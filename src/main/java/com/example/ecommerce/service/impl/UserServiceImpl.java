@@ -8,7 +8,9 @@ import com.example.ecommerce.repository.CartRepository;
 import com.example.ecommerce.repository.UserRepository;
 import com.example.ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,8 @@ import java.util.Collection;
 public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -32,19 +36,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<User> findByRole(String role) {
-        return userRepository.finsdAllByRole(role);
+        return userRepository.findAllByRole(role);
     }
+
 
     @Override
     @Transactional
     public User save(User user) {
-        user.setPassword((passwordEncoder.encode(user.getPassword())));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
             User savedUser = userRepository.save(user);
 
             Cart savedCart=cartRepository.save(new Cart(savedUser));
             savedUser.setCart(savedCart);
-            return userRepository.save(savedUser);
+            return userRepository.save(user);
         }
         catch (Exception e){
             throw  new MyException(ResultEnum.VALID_ERROR);
